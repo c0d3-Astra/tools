@@ -85,8 +85,8 @@ echo "source ~/gdb-dashboard/.gdbinit" >> ~/.gdbinit
 Clone or download the script.
 
 ```
-git clone https://github.com/yourusername/tmux-gdb-dashboard.git
-cd tmux-gdb-dashboard
+git clone https://github.com/c0d3-Astra/tools.git
+cd tools
 ```
 
 Make it executable:
