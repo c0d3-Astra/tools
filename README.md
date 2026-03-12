@@ -75,7 +75,7 @@ sudo apt install gdb
 
 ```
 git clone https://github.com/cyrus-and/gdb-dashboard.git
-echo "~/gdb-dashboard/.gdbinit" >> ~/.gdbinit
+echo "source ~/gdb-dashboard/.gdbinit" >> ~/.gdbinit
 ```
 
 ---
