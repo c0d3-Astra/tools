@@ -92,7 +92,7 @@ cd tools
 Make it executable:
 
 ```
-chmod +x gdb_tmux.sh
+chmod +x tm4.sh
 ```
 
 ---
@@ -100,7 +100,7 @@ chmod +x gdb_tmux.sh
 # Usage
 
 ```
-./gdb_tmux.sh <binary> <arch>
+./tm4.sh <binary> <arch>
 ```
 
 ### Example
@@ -108,13 +108,13 @@ chmod +x gdb_tmux.sh
 64-bit binary
 
 ```
-./gdb_tmux.sh ./vuln 64
+./tm4.sh ./vuln 64
 ```
 
 32-bit binary
 
 ```
-./gdb_tmux.sh ./vuln 32
+./tm4.sh ./vuln 32
 ```
 
 ---
