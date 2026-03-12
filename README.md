@@ -74,14 +74,8 @@ sudo apt install gdb
 ## Install GDB Dashboard
 
 ```
-wget -P ~ https://git.io/.gdbinit
-```
-
-or
-
-```
 git clone https://github.com/cyrus-and/gdb-dashboard.git
-cat gdb-dashboard/.gdbinit >> ~/.gdbinit
+echo "~/gdb-dashboard/.gdbinit" >> ~/.gdbinit
 ```
 
 ---
