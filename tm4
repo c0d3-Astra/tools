@@ -1,0 +1,63 @@
+#!/bin/bash
+
+SESSION="gbd_tmux"
+BIN="$1"
+ARCH="$2"
+
+tmux new-session -d -s $SESSION
+
+# make 2x2 grid
+tmux split-window -h
+tmux split-window -v
+tmux select-pane -t 1
+tmux split-window -v
+
+sleep 0.5
+
+# extract pane IDs
+PANES=($(tmux list-panes -F "#{pane_id}"))
+
+TOP_LEFT=${PANES[0]}
+BOTTOM_LEFT=${PANES[1]}
+TOP_RIGHT=${PANES[2]}
+BOTTOM_RIGHT=${PANES[3]}
+
+# extract TTYs
+TTY_TL=$(tmux display-message -p -t "$TOP_LEFT" "#{pane_tty}")
+TTY_TR=$(tmux display-message -p -t "$TOP_RIGHT" "#{pane_tty}")
+TTY_BL=$(tmux display-message -p -t "$BOTTOM_LEFT" "#{pane_tty}")
+TTY_BR=$(tmux display-message -p -t "$BOTTOM_RIGHT" "#{pane_tty}")
+
+# print mapping inside panes
+tmux send-keys -t "$TOP_LEFT" "echo TOP LEFT  -> $TTY_TL" C-m
+tmux send-keys -t "$TOP_RIGHT" "echo TOP RIGHT -> $TTY_TR" C-m
+tmux send-keys -t "$BOTTOM_LEFT" "echo BOTTOM LEFT -> $TTY_BL" C-m
+tmux send-keys -t "$BOTTOM_RIGHT" "echo BOTTOM RIGHT -> $TTY_BR" C-m
+
+# resive 
+tmux resize-pane -t "$BOTTOM_LEFT" -U 7
+tmux resize-pane -t "$BOTTOM_RIGHT" -U 7
+
+# set active panel bottom left 
+tmux select-pane -t "$BOTTOM_LEFT" 
+
+# cmd gdb 
+tmux send-keys -t "$BOTTOM_LEFT" "gdb $BIN" C-m
+sleep 2 
+tmux send-keys -t "$BOTTOM_LEFT" C-m
+tmux send-keys -t "$BOTTOM_LEFT" C-m
+
+# dashboard setting 
+tmux send-keys -t "$BOTTOM_LEFT" "dashboard -layout source registers memory assembly breakpoints variables" C-m
+tmux send-keys -t "$BOTTOM_LEFT" "dashboard source -output $TTY_TL" C-m
+tmux send-keys -t "$BOTTOM_LEFT" "dashboard registers -output $TTY_TR" C-m
+
+if [ "$ARCH" = "32" ]; then
+    STACK_REG="\$esp"
+else
+    STACK_REG="\$rsp"
+fi
+tmux send-keys -t "$BOTTOM_LEFT" "dashboard memory -output $TTY_BR" C-m
+tmux send-keys -t "$BOTTOM_LEFT" "dashboard memory watch $STACK_REG 256" C-m
+
+tmux attach -t $SESSION
