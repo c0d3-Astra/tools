@@ -1,26 +1,27 @@
 #!/bin/bash
 
-SESSION="gbd_tmux"
+SESSION="gdb_tmux"
 BIN="$1"
 ARCH="$2"
 
-tmux new-session -d -s $SESSION
+# 1. Create session and capture Top Left
+tmux new-session -d -s "$SESSION"
+TOP_LEFT=$(tmux display-message -p "#{pane_id}")
 
-# make 2x2 grid
+# 2. Split horizontally to create Right pane, capture Top Right
 tmux split-window -h
+TOP_RIGHT=$(tmux display-message -p "#{pane_id}")
+
+# 3. Split the Right pane vertically, capture Bottom Right
 tmux split-window -v
-tmux select-pane -t 1
+BOTTOM_RIGHT=$(tmux display-message -p "#{pane_id}")
+
+# 4. Move focus back to the original Left pane and split it vertically
+tmux select-pane -t "$TOP_LEFT"
 tmux split-window -v
+BOTTOM_LEFT=$(tmux display-message -p "#{pane_id}")
 
 sleep 0.5
-
-# extract pane IDs
-PANES=($(tmux list-panes -F "#{pane_id}"))
-
-TOP_LEFT=${PANES[0]}
-BOTTOM_LEFT=${PANES[1]}
-TOP_RIGHT=${PANES[2]}
-BOTTOM_RIGHT=${PANES[3]}
 
 # extract TTYs
 TTY_TL=$(tmux display-message -p -t "$TOP_LEFT" "#{pane_tty}")
@@ -34,7 +35,7 @@ tmux send-keys -t "$TOP_RIGHT" "echo TOP RIGHT -> $TTY_TR" C-m
 tmux send-keys -t "$BOTTOM_LEFT" "echo BOTTOM LEFT -> $TTY_BL" C-m
 tmux send-keys -t "$BOTTOM_RIGHT" "echo BOTTOM RIGHT -> $TTY_BR" C-m
 
-# resive 
+# resize 
 tmux resize-pane -t "$BOTTOM_LEFT" -U 7
 tmux resize-pane -t "$BOTTOM_RIGHT" -U 7
 
@@ -42,7 +43,7 @@ tmux resize-pane -t "$BOTTOM_RIGHT" -U 7
 tmux select-pane -t "$BOTTOM_LEFT" 
 
 # cmd gdb 
-tmux send-keys -t "$BOTTOM_LEFT" "gdb $BIN" C-m
+tmux send-keys -t "$BOTTOM_LEFT" "gdb -q -ex 'set pagination off' $BIN" C-m
 sleep 2 
 tmux send-keys -t "$BOTTOM_LEFT" C-m
 tmux send-keys -t "$BOTTOM_LEFT" C-m
@@ -60,4 +61,4 @@ fi
 tmux send-keys -t "$BOTTOM_LEFT" "dashboard memory -output $TTY_BR" C-m
 tmux send-keys -t "$BOTTOM_LEFT" "dashboard memory watch $STACK_REG 256" C-m
 
-tmux attach -t $SESSION
+tmux attach -t "$SESSION"
